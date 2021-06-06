@@ -1,6 +1,6 @@
 { mkDerivation, base, bytestring, Cabal, containers, contravariant
-, dhall, Diff, directory, filepath, microlens, optparse-applicative
-, prettyprinter, stdenv, tasty, tasty-golden, tasty-hunit, text
+, dhall, Diff, directory, filepath, lib, microlens, optparse-applicative
+, prettyprinter, tasty, tasty-golden, tasty-hunit, text
 , transformers, vector
 }:
 mkDerivation {
@@ -23,5 +23,5 @@ mkDerivation {
   ];
   homepage = "https://github.com/ocharles/dhall-to-cabal";
   description = "Compile Dhall expressions to Cabal files";
-  license = stdenv.lib.licenses.mit;
+  license = lib.licenses.mit;
 }

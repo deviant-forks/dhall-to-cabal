@@ -3,11 +3,11 @@
 , contravariant, cryptonite, data-fix, deepseq, Diff, directory
 , doctest, dotgen, either, exceptions, filepath, foldl, gauge
 , generic-random, haskeline, http-client, http-client-tls
-, http-types, lens-family-core, megaparsec, memory, mockery, mtl
+, http-types, lens-family-core, lib, megaparsec, memory, mockery, mtl
 , network-uri, optparse-applicative, parsers, prettyprinter
 , prettyprinter-ansi-terminal, profunctors, QuickCheck
 , quickcheck-instances, repline, scientific, semigroups, serialise
-, spoon, stdenv, tasty, tasty-expected-failure, tasty-hunit
+, spoon, tasty, tasty-expected-failure, tasty-hunit
 , tasty-quickcheck, template-haskell, text, th-lift-instances
 , transformers, transformers-compat, turtle, unordered-containers
 , uri-encode, vector
@@ -40,5 +40,5 @@ mkDerivation {
     base bytestring containers directory gauge serialise text
   ];
   description = "A configuration language guaranteed to terminate";
-  license = stdenv.lib.licenses.bsd3;
+  license = lib.licenses.bsd3;
 }

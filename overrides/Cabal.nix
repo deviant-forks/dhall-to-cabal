@@ -1,7 +1,7 @@
 { mkDerivation, array, base, base-compat, base-orphans, binary
 , bytestring, containers, deepseq, Diff, directory, filepath
-, integer-logarithms, mtl, optparse-applicative, parsec, pretty
-, process, QuickCheck, stdenv, stm, tagged, tar, tasty
+, integer-logarithms, lib, mtl, optparse-applicative, parsec, pretty
+, process, QuickCheck, stm, tagged, tar, tasty
 , tasty-golden, tasty-hunit, tasty-quickcheck, temporary, text
 , time, transformers, tree-diff, unix
 }:
@@ -23,5 +23,5 @@ mkDerivation {
   doCheck = false;
   homepage = "http://www.haskell.org/cabal/";
   description = "A framework for packaging Haskell software";
-  license = stdenv.lib.licenses.bsd3;
+  license = lib.licenses.bsd3;
 }
