@@ -88,6 +88,7 @@ import qualified Distribution.Types.PkgconfigName as Cabal
 import qualified Distribution.Types.PkgconfigVersion as Cabal
 import qualified Distribution.Types.PkgconfigVersionRange as Cabal
 import qualified Distribution.Types.UnqualComponentName as Cabal
+import qualified Distribution.Utils.ShortText as Cabal
 import qualified Distribution.Version as Cabal
 import qualified Language.Haskell.Extension as Cabal
 
@@ -162,37 +163,37 @@ packageDescription = do
     Dhall.field "license-files" ( Dhall.list Dhall.string )
 
   copyright <-
-    Dhall.field "copyright" Dhall.string
+    fmap Cabal.toShortText $ Dhall.field "copyright" Dhall.string
 
   maintainer <-
-    Dhall.field "maintainer" Dhall.string
+    fmap Cabal.toShortText $ Dhall.field "maintainer" Dhall.string
 
   author <-
-    Dhall.field "author" Dhall.string
+    fmap Cabal.toShortText $ Dhall.field "author" Dhall.string
 
   stability <-
-    Dhall.field "stability" Dhall.string
+    fmap Cabal.toShortText $ Dhall.field "stability" Dhall.string
 
   testedWith <-
     Dhall.field "tested-with" ( Dhall.list compiler )
 
   homepage <-
-    Dhall.field "homepage" Dhall.string
+    fmap Cabal.toShortText $ Dhall.field "homepage" Dhall.string
 
   pkgUrl <-
-    Dhall.field "package-url" Dhall.string
+    fmap Cabal.toShortText $ Dhall.field "package-url" Dhall.string
 
   bugReports <-
-    Dhall.field "bug-reports" Dhall.string
+    fmap Cabal.toShortText $ Dhall.field "bug-reports" Dhall.string
 
   synopsis <-
-    Dhall.field "synopsis" Dhall.string
+    fmap Cabal.toShortText $ Dhall.field "synopsis" Dhall.string
 
   description <-
-    Dhall.field "description" Dhall.string
+    fmap Cabal.toShortText $ Dhall.field "description" Dhall.string
 
   category <-
-    Dhall.field "category" Dhall.string
+    fmap Cabal.toShortText $ Dhall.field "category" Dhall.string
 
   setupBuildInfo <-
     Dhall.field "custom-setup" ( Dhall.maybe setupBuildInfo )
