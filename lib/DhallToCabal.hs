@@ -99,7 +99,7 @@ import DhallToCabal.Diff ( Diffable(..)  )
 
 
 
-packageIdentifier :: Dhall.RecordEncoder Cabal.PackageIdentifier
+packageIdentifier :: Dhall.RecordDecoder Cabal.PackageIdentifier
 packageIdentifier = do
   pkgName <-
     Dhall.field "name" packageName
@@ -117,7 +117,7 @@ packageName =
 
 
 
-packageDescription :: Dhall.RecordEncoder Cabal.PackageDescription
+packageDescription :: Dhall.RecordDecoder Cabal.PackageDescription
 packageDescription = do
   package <-
     packageIdentifier
@@ -284,7 +284,7 @@ benchmark =
 
 
 
-buildInfo :: Dhall.RecordEncoder Cabal.BuildInfo
+buildInfo :: Dhall.RecordDecoder Cabal.BuildInfo
 buildInfo = do
   buildable <-
     Dhall.field "buildable" Dhall.bool
