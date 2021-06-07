@@ -1,29 +1,32 @@
-{ mkDerivation, aeson, aeson-pretty, ansi-terminal, base
-, bytestring, case-insensitive, cborg, cborg-json, containers
+{ mkDerivation, aeson, aeson-pretty, ansi-terminal, atomic-write
+, base, bytestring, case-insensitive, cborg, cborg-json, containers
 , contravariant, cryptonite, data-fix, deepseq, Diff, directory
 , doctest, dotgen, either, exceptions, filepath, foldl, gauge
-, generic-random, haskeline, http-client, http-client-tls
+, generic-random, hashable, haskeline, http-client, http-client-tls
 , http-types, lens-family-core, lib, megaparsec, memory, mockery, mtl
-, network-uri, optparse-applicative, parsers, prettyprinter
-, prettyprinter-ansi-terminal, profunctors, QuickCheck
-, quickcheck-instances, repline, scientific, semigroups, serialise
-, spoon, tasty, tasty-expected-failure, tasty-hunit
-, tasty-quickcheck, template-haskell, text, th-lift-instances
-, transformers, transformers-compat, turtle, unordered-containers
-, uri-encode, vector
+, network-uri, optparse-applicative, parsers, pretty-simple
+, prettyprinter, prettyprinter-ansi-terminal, profunctors
+, QuickCheck, quickcheck-instances, repline, scientific, semigroups
+, serialise, special-values, spoon, tasty, tasty-expected-failure
+, tasty-hunit, tasty-quickcheck, template-haskell, text
+, th-lift-instances, transformers, transformers-compat, turtle
+, unordered-containers, uri-encode, vector
 }:
 mkDerivation {
   pname = "dhall";
-  version = "1.26.0";
-  sha256 = "f2d0b4a1e274fbc5684922be49c43333b063880db57458e78de2bebd9afb68ca";
+  version = "1.29.0";
+  sha256 = "1xp76wv36rfffym71gwdqsmwg3znmpsq5x9zgz3hfmzigxqmjgn7";
+  revision = "2";
+  editedCabalFile = "1qksvk63vmypqcd9hasacmqw7gsqcggs5lk85x7w2731mh3c3sa8";
   isLibrary = true;
   isExecutable = true;
   libraryHaskellDepends = [
-    aeson aeson-pretty ansi-terminal base bytestring case-insensitive
-    cborg cborg-json containers contravariant cryptonite data-fix
-    deepseq Diff directory dotgen either exceptions filepath haskeline
-    http-client http-client-tls http-types lens-family-core megaparsec
-    memory mtl network-uri optparse-applicative parsers prettyprinter
+    aeson aeson-pretty ansi-terminal atomic-write base bytestring
+    case-insensitive cborg cborg-json containers contravariant
+    cryptonite data-fix deepseq Diff directory dotgen either exceptions
+    filepath hashable haskeline http-client http-client-tls http-types
+    lens-family-core megaparsec memory mtl network-uri
+    optparse-applicative parsers pretty-simple prettyprinter
     prettyprinter-ansi-terminal profunctors repline scientific
     serialise template-haskell text th-lift-instances transformers
     transformers-compat unordered-containers uri-encode vector
@@ -31,10 +34,11 @@ mkDerivation {
   executableHaskellDepends = [ base ];
   testHaskellDepends = [
     base bytestring cborg containers data-fix deepseq directory doctest
-    filepath foldl generic-random lens-family-core megaparsec mockery
-    prettyprinter QuickCheck quickcheck-instances scientific semigroups
-    serialise spoon tasty tasty-expected-failure tasty-hunit
-    tasty-quickcheck text transformers turtle vector
+    either filepath foldl generic-random lens-family-core megaparsec
+    mockery prettyprinter QuickCheck quickcheck-instances scientific
+    semigroups serialise special-values spoon tasty
+    tasty-expected-failure tasty-hunit tasty-quickcheck text
+    transformers turtle unordered-containers vector
   ];
   benchmarkHaskellDepends = [
     base bytestring containers directory gauge serialise text
