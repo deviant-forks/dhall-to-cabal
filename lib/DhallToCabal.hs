@@ -252,13 +252,15 @@ version =
         e ->
           Dhall.extractError ( StrictText.pack ( show e ) )
 
-    expected =
-      Expr.Pi mempty "Version" ( Expr.Const Expr.Type )
-        $ Expr.Pi
-            mempty
-            "v"
-            ( Expr.Pi mempty "_" ( case Dhall.expected Dhall.string of Success value -> value ) "Version" )
-            "Version"
+    expected = do
+      expectedString <- Dhall.expected Dhall.string
+      return $
+        Expr.Pi mempty "Version" ( Expr.Const Expr.Type )
+          $ Expr.Pi
+              mempty
+              "v"
+              ( Expr.Pi mempty "_" expectedString "Version" )
+              "Version"
 
   in Dhall.Decoder { .. }
 
@@ -565,17 +567,19 @@ subLibrary =
             ( Map.lookup "library" fields )
         return ( name, tree )
       e ->
-        Dhall.typeError e expected
+        Dhall.typeError expected e
 
     expected = do
       expectedName <- Dhall.expected unqualComponentName
       expectedLibrary <- Dhall.expected library
-      return $ Expr.Record
-        ( Map.fromList
-          [ ( "name", Dhall.Core.makeRecordField expectedName )
-          , ( "library", Dhall.Core.makeRecordField $ Expr.Pi mempty "_" configRecordType expectedLibrary )
-          ]
-        )
+      expectedConfigRecordType <- configRecordType
+      return $
+        Expr.Record
+          ( Map.fromList
+            [ ( "name", Dhall.Core.makeRecordField expectedName )
+            , ( "library", Dhall.Core.makeRecordField $ Expr.Pi mempty "_" expectedConfigRecordType expectedLibrary )
+            ]
+          )
 
 
 sourceRepo :: Dhall.Decoder Cabal.SourceRepo
@@ -710,34 +714,33 @@ pkgconfigVersionRange =
           Cabal.PcIntersectVersionRanges <$> go a <*> go b
 
         e ->
-          Dhall.typeError e expected
+          Dhall.typeError expected e
 
-    expected =
-      let
-        pkgconfigVersionRange =
-          "PkgconfigVersionRange"
+    expected = do
+      let pkgconfigVersionRange = "PkgconfigVersionRange"
 
-        versionToVersionRange =
+      versionToVersionRange <- do
+        expectedPkgconfigVersion <- Dhall.expected pkgconfigVersion
+        return $
           Expr.Pi
             mempty
             "_"
-            ( case Dhall.expected pkgconfigVersion of Success value -> value)
+            expectedPkgconfigVersion
             pkgconfigVersionRange
 
-        combine =
-          Expr.Pi mempty "_" pkgconfigVersionRange ( Expr.Pi mempty "_" pkgconfigVersionRange pkgconfigVersionRange )
+      let combine = Expr.Pi mempty "_" pkgconfigVersionRange ( Expr.Pi mempty "_" pkgconfigVersionRange pkgconfigVersionRange )
 
-      in
-      Expr.Pi mempty "PkgconfigVersionRange" ( Expr.Const Expr.Type )
-        $ Expr.Pi mempty "anyVersion" pkgconfigVersionRange
-        $ Expr.Pi mempty "thisVersion" versionToVersionRange
-        $ Expr.Pi mempty "laterVersion" versionToVersionRange
-        $ Expr.Pi mempty "earlierVersion" versionToVersionRange
-        $ Expr.Pi mempty "orLaterVersion" versionToVersionRange
-        $ Expr.Pi mempty "orEarlierVersion" versionToVersionRange
-        $ Expr.Pi mempty "unionVersionRanges" combine
-        $ Expr.Pi mempty "intersectVersionRanges" combine
-        $ pkgconfigVersionRange
+      return $
+        Expr.Pi mempty "PkgconfigVersionRange" ( Expr.Const Expr.Type )
+          $ Expr.Pi mempty "anyVersion" pkgconfigVersionRange
+          $ Expr.Pi mempty "thisVersion" versionToVersionRange
+          $ Expr.Pi mempty "laterVersion" versionToVersionRange
+          $ Expr.Pi mempty "earlierVersion" versionToVersionRange
+          $ Expr.Pi mempty "orLaterVersion" versionToVersionRange
+          $ Expr.Pi mempty "orEarlierVersion" versionToVersionRange
+          $ Expr.Pi mempty "unionVersionRanges" combine
+          $ Expr.Pi mempty "intersectVersionRanges" combine
+          $ pkgconfigVersionRange
 
   in Dhall.Decoder { .. }
 
@@ -814,18 +817,19 @@ versionRange =
           Cabal.differenceVersionRanges <$> go a <*> go b
 
         e ->
-          Dhall.typeError e expected
+          Dhall.typeError expected e
 
     expected = do
       let versionRange = "VersionRange"
 
       versionToVersionRange <- do
         expectedVersion <- Dhall.expected version
-        return $ Expr.Pi
-          mempty
-          "_"
-          expectedVersion
-          versionRange
+        return $
+          Expr.Pi
+            mempty
+            "_"
+            expectedVersion
+            versionRange
 
       let combine = Expr.Pi mempty "_" versionRange ( Expr.Pi mempty "_" versionRange versionRange )
 
@@ -931,41 +935,47 @@ spdxLicense =
           SPDX.EOr <$> go a <*> go b
 
         e ->
-          Dhall.typeError e expected
+          Dhall.typeError expected e
 
-    expected =
-      let
-        licenseType =
-          "SPDX"
+    expected = do
+      let licenseType = "SPDX"
 
-        licenseIdAndException
-          = Expr.Pi mempty "id" ( case Dhall.expected spdxLicenseId of Success value -> value )
-          $ Expr.Pi mempty "exception" ( Dhall.expected ( Dhall.maybe spdxLicenseExceptionId ) )
+      licenseIdAndException <- do
+        expectedSpdxLicenseId <- Dhall.expected spdxLicenseId
+        expectedSpdxLicenseExceptionId <- Dhall.expected ( Dhall.maybe spdxLicenseExceptionId )
+        return $
+          Expr.Pi mempty "id" expectedSpdxLicenseId
+          $ Expr.Pi mempty "exception" expectedSpdxLicenseExceptionId
           $ licenseType
 
-        licenseRef
-          = Expr.Pi mempty "ref" ( case Dhall.expected Dhall.string of Success value -> value )
-          $ Expr.Pi mempty "exception" ( case Dhall.expected ( Dhall.maybe spdxLicenseExceptionId ) of Success value -> value )
+      licenseRef <- do
+        expectedString <- Dhall.expected Dhall.string
+        expectedSpdxLicenseExceptionId <- Dhall.expected ( Dhall.maybe spdxLicenseExceptionId )
+        return $
+          Expr.Pi mempty "ref" expectedString
+          $ Expr.Pi mempty "exception" expectedSpdxLicenseExceptionId
           $ licenseType
 
-        licenseRefWithFile
-          = Expr.Pi mempty "ref" ( case Dhall.expected Dhall.string of Success value -> value )
-          $ Expr.Pi mempty "file" ( case Dhall.expected Dhall.string of Success value -> value )
-          $ Expr.Pi mempty "exception" ( case Dhall.expected ( Dhall.maybe spdxLicenseExceptionId ) of Success value -> value )
+      licenseRefWithFile <- do
+        expectedString <- Dhall.expected Dhall.string
+        expectedSpdxLicenseExceptionId <- Dhall.expected ( Dhall.maybe spdxLicenseExceptionId )
+        return $
+          Expr.Pi mempty "ref" expectedString
+          $ Expr.Pi mempty "file" expectedString
+          $ Expr.Pi mempty "exception" expectedSpdxLicenseExceptionId
           $ licenseType
 
-        combine =
-          Expr.Pi mempty "_" licenseType ( Expr.Pi mempty "_" licenseType licenseType )
+      let combine = Expr.Pi mempty "_" licenseType ( Expr.Pi mempty "_" licenseType licenseType )
 
-      in
-      Expr.Pi mempty "SPDX" ( Expr.Const Expr.Type )
-        $ Expr.Pi mempty "license" licenseIdAndException
-        $ Expr.Pi mempty "licenseVersionOrLater" licenseIdAndException
-        $ Expr.Pi mempty "ref" licenseRef
-        $ Expr.Pi mempty "refWithFile" licenseRefWithFile
-        $ Expr.Pi mempty "and" combine
-        $ Expr.Pi mempty "or" combine
-        $ licenseType
+      return $
+        Expr.Pi mempty "SPDX" ( Expr.Const Expr.Type )
+          $ Expr.Pi mempty "license" licenseIdAndException
+          $ Expr.Pi mempty "licenseVersionOrLater" licenseIdAndException
+          $ Expr.Pi mempty "ref" licenseRef
+          $ Expr.Pi mempty "refWithFile" licenseRefWithFile
+          $ Expr.Pi mempty "and" combine
+          $ Expr.Pi mempty "or" combine
+          $ licenseType
 
   in Dhall.Decoder { .. }
 
@@ -1318,20 +1328,21 @@ configRecordType =
     expectedFlagName <- Dhall.expected flagName
     expectedCompilerFlavor <- Dhall.expected compilerFlavor
     expectedVersionRange <- Dhall.expected versionRange
-    return $ Expr.Record
-      ( Map.fromList
-          [ ( "os", predicate expectedOperatingSystem )
-          , ( "arch", predicate expectedArch )
-          , ( "flag", predicate expectedFlagName )
-          , ( "impl"
-            , Dhall.Core.makeRecordField $ Expr.Pi
-                mempty
-                "_"
-                expectedCompilerFlavor
-                ( Expr.Pi mempty "_" expectedVersionRange Expr.Bool )
-            )
-          ]
-      )
+    return $
+      Expr.Record
+        ( Map.fromList
+            [ ( "os", predicate expectedOperatingSystem )
+            , ( "arch", predicate expectedArch )
+            , ( "flag", predicate expectedFlagName )
+            , ( "impl"
+              , Dhall.Core.makeRecordField $ Expr.Pi
+                  mempty
+                  "_"
+                  expectedCompilerFlavor
+                  ( Expr.Pi mempty "_" expectedVersionRange Expr.Bool )
+              )
+            ]
+        )
 
 
 
