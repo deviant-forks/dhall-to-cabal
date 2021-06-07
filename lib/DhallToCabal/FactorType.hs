@@ -288,10 +288,12 @@ mapWithBindings f =
         Expr.None
 
       Expr.Record fields ->
-        Expr.Record ( fmap ( go bindings ) fields )
+        Expr.Record ( fmap ( \field@Dhall.RecordField{recordFieldValue=value} ->
+          field { Dhall.recordFieldValue = go bindings value } ) fields )
 
       Expr.RecordLit fields ->
-        Expr.RecordLit ( fmap ( go bindings ) fields )
+        Expr.RecordLit ( fmap ( \field@Dhall.RecordField{recordFieldValue=value} ->
+          field { Dhall.recordFieldValue = go bindings value } ) fields )
 
       Expr.Union fields ->
         Expr.Union ( fmap ( fmap ( go bindings ) ) fields )
