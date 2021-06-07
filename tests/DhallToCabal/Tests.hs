@@ -48,7 +48,7 @@ extract x y =
 testExtraction
   :: ( Eq a, Show a )
   => Test.Tasty.TestName
-  -> Dhall.Type a
+  -> Dhall.Decoder a
   -> Dhall.Core.Expr Dhall.Parser.Src Dhall.TypeCheck.X
   -> a
   -> Test.Tasty.TestTree

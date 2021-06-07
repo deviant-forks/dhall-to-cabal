@@ -83,8 +83,8 @@ rewriteConfigUse v =
 
   where
 
-    isConfigUse (App (Field (Var x') "os") _)           | v == x' = True
-    isConfigUse (App (Field (Var x') "arch") _)         | v == x' = True
-    isConfigUse (App (App (Field (Var x') "impl") _) _) | v == x' = True
-    isConfigUse (App (Field (Var x') "flag") _)         | v == x' = True
+    -- isConfigUse (App (Field (Var x') "os") _)           | v == x' = True
+    -- isConfigUse (App (Field (Var x') "arch") _)         | v == x' = True
+    -- isConfigUse (App (App (Field (Var x') "impl") _) _) | v == x' = True
+    -- isConfigUse (App (Field (Var x') "flag") _)         | v == x' = True
     isConfigUse _ = False
