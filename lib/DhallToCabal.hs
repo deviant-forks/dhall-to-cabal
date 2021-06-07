@@ -1136,7 +1136,7 @@ extension =
       then Cabal.EnableExtension ext
       else Cabal.DisableExtension ext
 
-    constr :: Cabal.KnownExtension -> Dhall.UnionEncoder Cabal.Extension
+    constr :: Cabal.KnownExtension -> Dhall.UnionDecoder Cabal.Extension
     constr ext = Dhall.constructor
       ( extName ext )
       ( enableDisable ext <$> Dhall.bool )
