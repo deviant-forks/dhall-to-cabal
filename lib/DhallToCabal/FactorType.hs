@@ -421,12 +421,6 @@ mapWithBindings f =
       Expr.Optional ->
         Expr.Optional
 
-      Expr.OptionalFold ->
-        Expr.OptionalFold
-
-      Expr.OptionalBuild ->
-        Expr.OptionalBuild
-
       Expr.Assert a ->
         Expr.Assert
           ( go bindings a )
