@@ -271,7 +271,13 @@ mapWithBindings f =
         Expr.Combine charSet label ( go bindings a ) ( go bindings b )
 
       Expr.Prefer charSet annotation a b ->
-        Expr.Prefer charSet annotation ( go bindings a ) ( go bindings b )
+        Expr.Prefer charSet
+          ( case annotation of
+              Dhall.PreferFromWith expr -> Dhall.PreferFromWith ( go bindings expr )
+              Dhall.PreferFromSource -> Dhall.PreferFromSource
+              Dhall.PreferFromCompletion -> Dhall.PreferFromCompletion
+          )
+          ( go bindings a ) ( go bindings b )
 
       Expr.TextAppend a b ->
         Expr.TextAppend ( go bindings a ) ( go bindings b )
