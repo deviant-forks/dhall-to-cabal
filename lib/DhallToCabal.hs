@@ -567,11 +567,13 @@ subLibrary =
       e ->
         Dhall.typeError e expected
 
-    expected =
-      Expr.Record
+    expected = do
+      expectedName <- Dhall.expected unqualComponentName
+      expectedLibrary <- Dhall.expected library
+      return $ Expr.Record
         ( Map.fromList
-          [ ( "name", case Dhall.expected unqualComponentName of Success value -> value )
-          , ( "library", Expr.Pi mempty "_" configRecordType ( case Dhall.expected library of Success value -> value ) )
+          [ ( "name", Dhall.Core.makeRecordField expectedName )
+          , ( "library", Dhall.Core.makeRecordField $ Expr.Pi mempty "_" configRecordType expectedLibrary )
           ]
         )
 
@@ -814,41 +816,39 @@ versionRange =
         e ->
           Dhall.typeError e expected
 
-    expected =
-      let
-        versionRange =
-          "VersionRange"
+    expected = do
+      let versionRange = "VersionRange"
 
-        versionToVersionRange =
-          Expr.Pi
-            mempty
-            "_"
-            ( case Dhall.expected version of Success value -> value )
-            versionRange
+      versionToVersionRange <- do
+        expectedVersion <- Dhall.expected version
+        return $ Expr.Pi
+          mempty
+          "_"
+          expectedVersion
+          versionRange
 
-        combine =
-          Expr.Pi mempty "_" versionRange ( Expr.Pi mempty "_" versionRange versionRange )
+      let combine = Expr.Pi mempty "_" versionRange ( Expr.Pi mempty "_" versionRange versionRange )
 
-      in
-      Expr.Pi mempty "VersionRange" ( Expr.Const Expr.Type )
-        $ Expr.Pi mempty "anyVersion" versionRange
-        $ Expr.Pi mempty "noVersion" versionRange
-        $ Expr.Pi mempty "thisVersion" versionToVersionRange
-        $ Expr.Pi mempty "notThisVersion" versionToVersionRange
-        $ Expr.Pi mempty "laterVersion" versionToVersionRange
-        $ Expr.Pi mempty "earlierVersion" versionToVersionRange
-        $ Expr.Pi mempty "orLaterVersion" versionToVersionRange
-        $ Expr.Pi mempty "orEarlierVersion" versionToVersionRange
-        $ Expr.Pi mempty "withinVersion" versionToVersionRange
-        $ Expr.Pi mempty "majorBoundVersion" versionToVersionRange
-        $ Expr.Pi mempty "unionVersionRanges" combine
-        $ Expr.Pi mempty "intersectVersionRanges" combine
-        $ Expr.Pi mempty "differenceVersionRanges" combine
-        $ Expr.Pi
-            mempty
-            "invertVersionRange"
-            ( Expr.Pi mempty "_" versionRange versionRange )
-            versionRange
+      return $
+        Expr.Pi mempty "VersionRange" ( Expr.Const Expr.Type )
+          $ Expr.Pi mempty "anyVersion" versionRange
+          $ Expr.Pi mempty "noVersion" versionRange
+          $ Expr.Pi mempty "thisVersion" versionToVersionRange
+          $ Expr.Pi mempty "notThisVersion" versionToVersionRange
+          $ Expr.Pi mempty "laterVersion" versionToVersionRange
+          $ Expr.Pi mempty "earlierVersion" versionToVersionRange
+          $ Expr.Pi mempty "orLaterVersion" versionToVersionRange
+          $ Expr.Pi mempty "orEarlierVersion" versionToVersionRange
+          $ Expr.Pi mempty "withinVersion" versionToVersionRange
+          $ Expr.Pi mempty "majorBoundVersion" versionToVersionRange
+          $ Expr.Pi mempty "unionVersionRanges" combine
+          $ Expr.Pi mempty "intersectVersionRanges" combine
+          $ Expr.Pi mempty "differenceVersionRanges" combine
+          $ Expr.Pi
+              mempty
+              "invertVersionRange"
+              ( Expr.Pi mempty "_" versionRange versionRange )
+              versionRange
 
   in Dhall.Decoder { .. }
 
@@ -1234,8 +1234,10 @@ guarded t =
                 )
             )
 
-    expected =
-        Expr.Pi mempty "_" configRecordType ( case Dhall.expected t of Success value -> value)
+    expected = do
+        expectedT <- Dhall.expected t
+        expectedConfigRecordType <- configRecordType
+        return $ Expr.Pi mempty "_" expectedConfigRecordType expectedT
 
   in Dhall.Decoder { .. }
 
@@ -1304,24 +1306,29 @@ mergeCommonGuards ( a : as ) =
 
 
 
-configRecordType :: Expr.Expr Dhall.Parser.Src Dhall.TypeCheck.X
+configRecordType :: Dhall.Expector (Expr.Expr Dhall.Parser.Src Dhall.TypeCheck.X)
 configRecordType =
   let
     predicate on =
-      Expr.Pi mempty "_" on Expr.Bool
+      Dhall.Core.makeRecordField $ Expr.Pi mempty "_" on Expr.Bool
 
-  in
-    Expr.Record
+  in do
+    expectedOperatingSystem <- Dhall.expected operatingSystem
+    expectedArch <- Dhall.expected arch
+    expectedFlagName <- Dhall.expected flagName
+    expectedCompilerFlavor <- Dhall.expected compilerFlavor
+    expectedVersionRange <- Dhall.expected versionRange
+    return $ Expr.Record
       ( Map.fromList
-          [ ( "os", predicate ( case Dhall.expected operatingSystem of Success value -> value ) )
-          , ( "arch", predicate ( case Dhall.expected arch of Success value -> value ) )
-          , ( "flag", predicate ( case Dhall.expected flagName of Success value -> value ) )
+          [ ( "os", predicate expectedOperatingSystem )
+          , ( "arch", predicate expectedArch )
+          , ( "flag", predicate expectedFlagName )
           , ( "impl"
-            , Expr.Pi
+            , Dhall.Core.makeRecordField $ Expr.Pi
                 mempty
                 "_"
-                ( case Dhall.expected compilerFlavor of Success value -> value )
-                ( Expr.Pi mempty "_" ( case Dhall.expected versionRange of Success value -> value ) Expr.Bool )
+                expectedCompilerFlavor
+                ( Expr.Pi mempty "_" expectedVersionRange Expr.Bool )
             )
           ]
       )
