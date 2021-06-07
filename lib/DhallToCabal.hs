@@ -1168,13 +1168,13 @@ guarded t =
   let
     extractConfVar body =
       case body of
-        Expr.App ( Expr.App ( Expr.Field "config" "impl" ) compiler ) version ->
+        Expr.App ( Expr.App ( Expr.Field "config" Dhall.Core.FieldSelection{fieldSelectionLabel="impl"} ) compiler ) version ->
           Cabal.Impl
             <$> Dhall.extract compilerFlavor compiler
             <*> Dhall.extract versionRange version
 
         Expr.App ( Expr.Field "config" field ) x ->
-          case field of
+          case Dhall.Core.fieldSelectionLabel field of
             "os" ->
               Cabal.OS <$> Dhall.extract operatingSystem x
 
