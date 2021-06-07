@@ -291,9 +291,9 @@ buildInfoDefault resolve = fields
       ]
 
 
-libraryVisibility :: Dhall.InputType Cabal.LibraryVisibility
+libraryVisibility :: Dhall.Encoder Cabal.LibraryVisibility
 libraryVisibility =
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed = \case
         Cabal.LibraryVisibilityPublic ->
             Expr.Var "types" `Expr.Field` "LibraryVisibility" `Expr.Field` "public"
@@ -486,7 +486,7 @@ withDefault _ _ expr =
 newtype RecordInputType a =
   RecordInputType
     { _unRecordInputType ::
-        Map.Map Dhall.Text ( Dhall.InputType a )
+        Map.Map Dhall.Text ( Dhall.Encoder a )
     }
   deriving ( Semigroup, Monoid )
 
@@ -496,30 +496,30 @@ instance Contravariant RecordInputType where
     RecordInputType ( fmap ( contramap f ) map )
 
 
-recordField :: Dhall.Text -> Dhall.InputType a -> RecordInputType a
+recordField :: Dhall.Text -> Dhall.Encoder a -> RecordInputType a
 recordField k v =
   RecordInputType ( Map.singleton k v )
 
 
-runRecordInputType :: RecordInputType a -> Dhall.InputType a
+runRecordInputType :: RecordInputType a -> Dhall.Encoder a
 runRecordInputType ( RecordInputType m ) =
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed =
         \a -> sortExpr ( Expr.RecordLit ( fmap ( \t -> Dhall.embed t a ) m ) )
     , Dhall.declared = sortExpr ( Expr.Record ( fmap Dhall.declared m ) )
     }
 
 
-runRecordInputTypeWithDefault :: KnownDefault -> Default Dhall.Parser.Src Dhall.TypeCheck.X -> RecordInputType a -> Dhall.InputType a
+runRecordInputTypeWithDefault :: KnownDefault -> Default Dhall.Parser.Src Dhall.TypeCheck.X -> RecordInputType a -> Dhall.Encoder a
 runRecordInputTypeWithDefault typ def m =
   let
-    Dhall.InputType embed declared = runRecordInputType m
+    Dhall.Encoder embed declared = runRecordInputType m
   in
-    Dhall.InputType ( withDefault typ def . embed ) declared
+    Dhall.Encoder ( withDefault typ def . embed ) declared
 
 
 genericPackageDescriptionToDhall
-  :: Dhall.InputType Cabal.GenericPackageDescription
+  :: Dhall.Encoder Cabal.GenericPackageDescription
 genericPackageDescriptionToDhall =
   let
     named k v =
@@ -599,14 +599,14 @@ packageIdentifierToRecord =
     ]
 
 
-packageNameToDhall :: Dhall.InputType Cabal.PackageName
+packageNameToDhall :: Dhall.Encoder Cabal.PackageName
 packageNameToDhall =
   contramap Cabal.unPackageName stringToDhall
 
 
-versionToDhall :: Dhall.InputType Cabal.Version
+versionToDhall :: Dhall.Encoder Cabal.Version
 versionToDhall =
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed =
         Expr.App ( Expr.Var "prelude" `Expr.Field` "v" )
           . Dhall.embed stringToDhall
@@ -617,13 +617,13 @@ versionToDhall =
     }
 
 
-stringToDhall :: Dhall.InputType String
+stringToDhall :: Dhall.Encoder String
 stringToDhall =
   contramap StrictText.pack Dhall.inject
 
-licenseToDhall :: Dhall.InputType (Either SPDX.License Cabal.License)
+licenseToDhall :: Dhall.Encoder (Either SPDX.License Cabal.License)
 licenseToDhall =
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed = \l ->
         case l of
           Right ( Cabal.GPL v ) ->
@@ -674,9 +674,9 @@ licenseToDhall =
     licenseNullary name =
       Expr.Var "types" `Expr.Field` "License" `Expr.Field` name
 
-spdxLicenseExpressionToDhall :: Dhall.InputType SPDX.LicenseExpression
+spdxLicenseExpressionToDhall :: Dhall.Encoder SPDX.LicenseExpression
 spdxLicenseExpressionToDhall =
-    Dhall.InputType
+    Dhall.Encoder
     { Dhall.embed =
         let
           go lexp = case lexp of
@@ -732,9 +732,9 @@ spdxLicenseExpressionToDhall =
         Expr.Var "types" `Expr.Field` "SPDX"
     }
 
-spdxLicenseIdToDhall :: Dhall.InputType SPDX.LicenseId
+spdxLicenseIdToDhall :: Dhall.Encoder SPDX.LicenseId
 spdxLicenseIdToDhall =
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed = \ident ->
         Expr.Var "types" `Expr.Field` "LicenseId" `Expr.Field` identName ident
     , Dhall.declared =
@@ -747,9 +747,9 @@ spdxLicenseIdToDhall =
   identName e =
     StrictText.pack ( show e )
 
-spdxLicenseExceptionIdToDhall :: Dhall.InputType SPDX.LicenseExceptionId
+spdxLicenseExceptionIdToDhall :: Dhall.Encoder SPDX.LicenseExceptionId
 spdxLicenseExceptionIdToDhall =
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed = \ident ->
         Expr.Var "types" `Expr.Field` "LicenseExceptionId" `Expr.Field` identName ident
     , Dhall.declared =
@@ -763,9 +763,9 @@ spdxLicenseExceptionIdToDhall =
     StrictText.pack ( show e )
 
 
-maybeToDhall :: Dhall.InputType a -> Dhall.InputType ( Maybe a )
+maybeToDhall :: Dhall.Encoder a -> Dhall.Encoder ( Maybe a )
 maybeToDhall t =
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed =
         \a -> case a of
             Nothing -> Expr.App Expr.None (Dhall.declared t)
@@ -774,9 +774,9 @@ maybeToDhall t =
     }
 
 
-listOf :: Dhall.InputType a -> Dhall.InputType [ a ]
+listOf :: Dhall.Encoder a -> Dhall.Encoder [ a ]
 listOf t =
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed =
         \a ->
           Expr.ListLit
@@ -786,7 +786,7 @@ listOf t =
     }
 
 
-compiler :: Dhall.InputType ( Cabal.CompilerFlavor, Cabal.VersionRange )
+compiler :: Dhall.Encoder ( Cabal.CompilerFlavor, Cabal.VersionRange )
 compiler =
   runRecordInputType
     ( mconcat
@@ -796,7 +796,7 @@ compiler =
     )
 
 
-compilerFlavor :: Dhall.InputType Cabal.CompilerFlavor
+compilerFlavor :: Dhall.Encoder Cabal.CompilerFlavor
 compilerFlavor =
   let
     constructor k v =
@@ -805,7 +805,7 @@ compilerFlavor =
       Expr.Var "types" `Expr.Field` "Compiler" `Expr.Field` k
 
   in
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed = \case
         Cabal.Eta ->
           nullary "Eta"
@@ -852,9 +852,9 @@ compilerFlavor =
     }
 
 
-versionRange :: Dhall.InputType Cabal.VersionRange
+versionRange :: Dhall.Encoder Cabal.VersionRange
 versionRange =
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed =
         \versionRange0 ->
           let
@@ -900,7 +900,7 @@ versionRange =
     }
 
 
-sourceRepo :: Dhall.InputType Cabal.SourceRepo
+sourceRepo :: Dhall.Encoder Cabal.SourceRepo
 sourceRepo =
   ( runRecordInputTypeWithDefault SourceRepo sourceRepoDefault
       ( mconcat
@@ -919,9 +919,9 @@ sourceRepo =
   }
 
 
-repoKind :: Dhall.InputType Cabal.RepoKind
+repoKind :: Dhall.Encoder Cabal.RepoKind
 repoKind =
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed = \case
         Cabal.RepoThis ->
           Expr.Var "types" `Expr.Field` "RepoKind" `Expr.Field` "RepoThis"
@@ -936,9 +936,9 @@ repoKind =
     }
 
 
-repoType :: Dhall.InputType Cabal.RepoType
+repoType :: Dhall.Encoder Cabal.RepoType
 repoType =
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed = \case
         Cabal.Darcs ->
           constr "Darcs"
@@ -968,17 +968,17 @@ repoType =
       Expr.Var "types" `Expr.Field` "RepoType" `Expr.Field` name
 
 
-specVersion :: Dhall.InputType ( Either Cabal.Version Cabal.VersionRange )
+specVersion :: Dhall.Encoder ( Either Cabal.Version Cabal.VersionRange )
 specVersion =
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed = either ( Dhall.embed versionToDhall ) ( error "Only exact cabal-versions are supported" )
     , Dhall.declared = Dhall.declared versionToDhall
     }
 
 
-buildType :: Dhall.InputType Cabal.BuildType
+buildType :: Dhall.Encoder Cabal.BuildType
 buildType =
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed = \case
         Cabal.Simple ->
           Expr.Var "types" `Expr.Field` "BuildType" `Expr.Field` "Simple"
@@ -997,7 +997,7 @@ buildType =
     }
 
 
-setupBuildInfo :: Dhall.InputType Cabal.SetupBuildInfo
+setupBuildInfo :: Dhall.Encoder Cabal.SetupBuildInfo
 setupBuildInfo =
   ( runRecordInputType
       ( mconcat
@@ -1010,9 +1010,9 @@ setupBuildInfo =
     }
 
 
-libraryName :: Dhall.InputType Cabal.LibraryName
+libraryName :: Dhall.Encoder Cabal.LibraryName
 libraryName =
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed = \case
         Cabal.LMainLibName ->
           Expr.Var "types" `Expr.Field` "LibraryName" `Expr.Field` "main-library"
@@ -1025,7 +1025,7 @@ libraryName =
     }
 
 
-dependency :: Dhall.InputType Cabal.Dependency
+dependency :: Dhall.Encoder Cabal.Dependency
 dependency =
   ( runRecordInputType
     ( mconcat
@@ -1040,7 +1040,7 @@ dependency =
     }
 
 
-flag :: Dhall.InputType Cabal.Flag
+flag :: Dhall.Encoder Cabal.Flag
 flag =
   runRecordInputType
     ( mconcat
@@ -1052,12 +1052,12 @@ flag =
     )
 
 
-flagName :: Dhall.InputType Cabal.FlagName
+flagName :: Dhall.Encoder Cabal.FlagName
 flagName =
   contramap Cabal.unFlagName stringToDhall
 
 
-library :: Bool -> Dhall.InputType Cabal.Library
+library :: Bool -> Dhall.Encoder Cabal.Library
 library named =
   ( runRecordInputTypeWithDefault
       ( if named then NamedLibrary else MainLibrary )
@@ -1109,8 +1109,8 @@ unifyCondTree =
 
 condTree
   :: ( Monoid a )
-  => Dhall.InputType a
-  -> Dhall.InputType ( Cabal.CondTree Cabal.ConfVar x a )
+  => Dhall.Encoder a
+  -> Dhall.Encoder ( Cabal.CondTree Cabal.ConfVar x a )
 condTree t =
   let
     go = \case
@@ -1127,7 +1127,7 @@ condTree t =
       Expr.Var "types" `Expr.Field` "Config"
 
   in
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed =
         Expr.Lam "config" configRecord
           . go
@@ -1137,14 +1137,14 @@ condTree t =
     }
 
 
-moduleName :: Dhall.InputType Cabal.ModuleName
+moduleName :: Dhall.Encoder Cabal.ModuleName
 moduleName =
   contramap ( show . Cabal.pretty ) stringToDhall
 
 
-condBranchCondition :: Dhall.InputType (Cabal.Condition Cabal.ConfVar)
+condBranchCondition :: Dhall.Encoder (Cabal.Condition Cabal.ConfVar)
 condBranchCondition =
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.declared = Expr.Bool
     , Dhall.embed =
         \a ->
@@ -1175,9 +1175,9 @@ condBranchCondition =
     }
 
 
-os :: Dhall.InputType Cabal.OS
+os :: Dhall.Encoder Cabal.OS
 os =
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed = \case
         Cabal.Linux ->
           Expr.Var "types" `Expr.Field` "OS" `Expr.Field` "Linux"
@@ -1237,9 +1237,9 @@ os =
     }
 
 
-arch :: Dhall.InputType Cabal.Arch
+arch :: Dhall.Encoder Cabal.Arch
 arch =
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed = \case
         Cabal.I386 ->
           arch "I386"
@@ -1334,7 +1334,7 @@ buildInfoRecord =
     ]
 
 
-moduleReexport :: Dhall.InputType Cabal.ModuleReexport
+moduleReexport :: Dhall.Encoder Cabal.ModuleReexport
 moduleReexport =
   runRecordInputType
     ( mconcat
@@ -1352,7 +1352,7 @@ moduleReexport =
     )
 
 
-legacyExeDependency :: Dhall.InputType Cabal.LegacyExeDependency
+legacyExeDependency :: Dhall.Encoder Cabal.LegacyExeDependency
 legacyExeDependency =
   runRecordInputType
     ( mconcat
@@ -1361,7 +1361,7 @@ legacyExeDependency =
         ]
     )
 
-exeDependency :: Dhall.InputType Cabal.ExeDependency
+exeDependency :: Dhall.Encoder Cabal.ExeDependency
 exeDependency =
   runRecordInputType
     ( mconcat
@@ -1372,12 +1372,12 @@ exeDependency =
     )
 
 
-unqualComponentName :: Dhall.InputType Cabal.UnqualComponentName
+unqualComponentName :: Dhall.Encoder Cabal.UnqualComponentName
 unqualComponentName =
   show . Cabal.pretty >$< stringToDhall
 
 
-pkgconfigDependency :: Dhall.InputType Cabal.PkgconfigDependency
+pkgconfigDependency :: Dhall.Encoder Cabal.PkgconfigDependency
 pkgconfigDependency =
   runRecordInputType
     ( mconcat
@@ -1387,17 +1387,17 @@ pkgconfigDependency =
     )
 
 
-pkgconfigName :: Dhall.InputType Cabal.PkgconfigName
+pkgconfigName :: Dhall.Encoder Cabal.PkgconfigName
 pkgconfigName =
   show . Cabal.pretty >$< stringToDhall
 
 
 -- PkgconfigVersion is restricted to ASCII-only characters.
-pkgconfigVersion :: Dhall.InputType Cabal.PkgconfigVersion
+pkgconfigVersion :: Dhall.Encoder Cabal.PkgconfigVersion
 pkgconfigVersion = (\ ( Cabal.PkgconfigVersion a ) -> StrictText.decodeLatin1 a ) >$< Dhall.inject
 
-pkgconfigVersionRange :: Dhall.InputType Cabal.PkgconfigVersionRange
-pkgconfigVersionRange =  Dhall.InputType
+pkgconfigVersionRange :: Dhall.Encoder Cabal.PkgconfigVersionRange
+pkgconfigVersionRange =  Dhall.Encoder
     { Dhall.embed =
           let
             go = \case
@@ -1444,9 +1444,9 @@ pkgconfigVersionRange =  Dhall.InputType
     }
 
 
-language :: Dhall.InputType Cabal.Language
+language :: Dhall.Encoder Cabal.Language
 language =
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed = \case
         Cabal.Haskell2010 ->
           lang "Haskell2010"
@@ -1463,9 +1463,9 @@ language =
     lang name =
       Expr.Var "types" `Expr.Field` "Language" `Expr.Field` name
 
-extension :: Dhall.InputType Cabal.Extension
+extension :: Dhall.Encoder Cabal.Extension
 extension =
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed =
         \a ->
           case a of
@@ -1493,7 +1493,7 @@ extension =
       ( Expr.BoolLit trueFalse )
 
 
-compilerOptions :: Dhall.InputType ( Cabal.PerCompilerFlavor [ String ] )
+compilerOptions :: Dhall.Encoder ( Cabal.PerCompilerFlavor [ String ] )
 compilerOptions =
   ( runRecordInputTypeWithDefault CompilerOptions compilerOptionsDefault
       ( mconcat
@@ -1507,7 +1507,7 @@ compilerOptions =
     }
 
 
-mixin :: Dhall.InputType Cabal.Mixin
+mixin :: Dhall.Encoder Cabal.Mixin
 mixin =
   ( runRecordInputType
       ( mconcat
@@ -1522,7 +1522,7 @@ mixin =
     }
 
 
-includeRenaming :: Dhall.InputType Cabal.IncludeRenaming
+includeRenaming :: Dhall.Encoder Cabal.IncludeRenaming
 includeRenaming =
   runRecordInputType
     ( mconcat
@@ -1532,9 +1532,9 @@ includeRenaming =
     )
 
 
-moduleRenaming :: Dhall.InputType Cabal.ModuleRenaming
+moduleRenaming :: Dhall.Encoder Cabal.ModuleRenaming
 moduleRenaming =
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed =
         \a ->
           case a of
@@ -1569,7 +1569,7 @@ moduleRenaming =
     }
 
 
-benchmark :: Dhall.InputType Cabal.Benchmark
+benchmark :: Dhall.Encoder Cabal.Benchmark
 benchmark =
   (  runRecordInputTypeWithDefault Benchmark benchmarkDefault
        ( mconcat
@@ -1588,7 +1588,7 @@ benchmark =
     }
 
 
-testSuite :: Dhall.InputType Cabal.TestSuite
+testSuite :: Dhall.Encoder Cabal.TestSuite
 testSuite =
   ( runRecordInputTypeWithDefault TestSuite testSuiteDefault
       ( mconcat
@@ -1602,9 +1602,9 @@ testSuite =
     }
 
 
-testSuiteInterface :: Dhall.InputType Cabal.TestSuiteInterface
+testSuiteInterface :: Dhall.Encoder Cabal.TestSuiteInterface
 testSuiteInterface =
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed = \case
         Cabal.TestSuiteExeV10 _ main ->
           Expr.App
@@ -1628,7 +1628,7 @@ testSuiteInterface =
     Expr.Var "types" `Expr.Field` "TestType" `Expr.Field` name
 
 
-executable :: Dhall.InputType Cabal.Executable
+executable :: Dhall.Encoder Cabal.Executable
 executable =
   ( runRecordInputTypeWithDefault Executable executableDefault
       ( mconcat
@@ -1643,9 +1643,9 @@ executable =
     }
 
 
-executableScope :: Dhall.InputType Cabal.ExecutableScope
+executableScope :: Dhall.Encoder Cabal.ExecutableScope
 executableScope =
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed = \case
         Cabal.ExecutablePublic ->
             Expr.Var "types" `Expr.Field` "Scope" `Expr.Field` "Public"
@@ -1656,7 +1656,7 @@ executableScope =
     }
 
 
-foreignLibrary :: Dhall.InputType Cabal.ForeignLib
+foreignLibrary :: Dhall.Encoder Cabal.ForeignLib
 foreignLibrary =
   ( runRecordInputType
       ( mconcat
@@ -1674,7 +1674,7 @@ foreignLibrary =
     }
 
 
-versionInfo :: Dhall.InputType Cabal.LibVersionInfo
+versionInfo :: Dhall.Encoder Cabal.LibVersionInfo
 versionInfo =
   Cabal.libVersionInfoCRA >$<
   runRecordInputType
@@ -1686,9 +1686,9 @@ versionInfo =
     )
 
 
-foreignLibOption :: Dhall.InputType Cabal.ForeignLibOption
+foreignLibOption :: Dhall.Encoder Cabal.ForeignLibOption
 foreignLibOption =
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed = \case
         Cabal.ForeignLibStandalone ->
           Expr.Var "types" `Expr.Field` "ForeignLibOption" `Expr.Field` "Standalone"
@@ -1697,9 +1697,9 @@ foreignLibOption =
     }
 
 
-foreignLibType :: Dhall.InputType Cabal.ForeignLibType
+foreignLibType :: Dhall.Encoder Cabal.ForeignLibType
 foreignLibType =
-  Dhall.InputType
+  Dhall.Encoder
     { Dhall.embed = \case
         Cabal.ForeignLibNativeShared ->
           ty "Shared"
