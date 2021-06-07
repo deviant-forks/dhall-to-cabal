@@ -560,12 +560,12 @@ subLibrary =
           maybe
             ( Dhall.extractError "Missing 'name' field of sub-library." )
             ( Dhall.extract unqualComponentName )
-            ( Map.lookup "name" fields )
+            ( fmap Dhall.Core.recordFieldValue $ Map.lookup "name" fields )
         tree <- Dhall.toMonadic $
           maybe
             ( Dhall.extractError "Missing 'library' field of sub-library." )
             ( Dhall.extract ( guarded ( ($ Cabal.LSubLibName name) <$> library ) ) )
-            ( Map.lookup "library" fields )
+            ( fmap Dhall.Core.recordFieldValue $ Map.lookup "library" fields )
         return ( name, tree )
       e ->
         Dhall.typeError expected e
