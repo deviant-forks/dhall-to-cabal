@@ -44,10 +44,12 @@ import qualified Distribution.Types.BuildInfo as Cabal
 import qualified Distribution.Types.BuildType as Cabal
 import qualified Distribution.Types.CondTree as Cabal
 import qualified Distribution.Types.Condition as Cabal
+import qualified Distribution.Types.ConfVar as Cabal
 import qualified Distribution.Types.Dependency as Cabal
 import qualified Distribution.Types.ExeDependency as Cabal
 import qualified Distribution.Types.Executable as Cabal
 import qualified Distribution.Types.ExecutableScope as Cabal
+import qualified Distribution.Types.Flag as Cabal
 import qualified Distribution.Types.ForeignLib as Cabal
 import qualified Distribution.Types.ForeignLibOption as Cabal
 import qualified Distribution.Types.ForeignLibType as Cabal
