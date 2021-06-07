@@ -13,6 +13,7 @@ module DhallToCabal.FactorType
   where
 
 import Control.Monad ( guard )
+import Data.Either.Validation ( Validation(..) )
 import Data.Foldable ( foldl' )
 import Data.Maybe ( fromMaybe )
 import Data.Text (Text)
@@ -86,42 +87,42 @@ isCandidateSubrecord _ = False
 dhallType :: KnownType -> Dhall.Expr Dhall.Parser.Src a
 dhallType t = fmap absurd
   ( case t of
-      Config -> configRecordType
-      Library -> Dhall.expected library
-      ForeignLibrary -> Dhall.expected foreignLib
-      Executable -> Dhall.expected executable
-      Benchmark -> Dhall.expected benchmark
-      TestSuite -> Dhall.expected testSuite
-      SetupBuildInfo -> Dhall.expected setupBuildInfo
+      Config -> case configRecordType of Success value -> value
+      Library -> case Dhall.expected library of Success value -> value
+      ForeignLibrary -> case Dhall.expected foreignLib of Success value -> value
+      Executable -> case Dhall.expected executable of Success value -> value
+      Benchmark -> case Dhall.expected benchmark of Success value -> value
+      TestSuite -> case Dhall.expected testSuite of Success value -> value
+      SetupBuildInfo -> case Dhall.expected setupBuildInfo of Success value -> value
       BuildInfo -> buildInfoType
-      SourceRepo -> Dhall.expected sourceRepo
-      RepoType -> Dhall.expected repoType
-      RepoKind -> Dhall.expected repoKind
-      Compiler -> Dhall.expected compilerFlavor
-      OS -> Dhall.expected operatingSystem
-      Extension -> Dhall.expected extension
-      CompilerOptions -> Dhall.expected compilerOptions
-      Arch -> Dhall.expected arch
-      Language -> Dhall.expected language
-      License -> Dhall.expected license
-      BuildType -> Dhall.expected buildType
-      Package -> Dhall.expected genericPackageDescription
-      Dependency -> Dhall.expected dependency
-      VersionRange -> Dhall.expected versionRange
-      Version -> Dhall.expected version
-      SPDX -> Dhall.expected spdxLicense
-      LicenseId -> Dhall.expected spdxLicenseId
-      LicenseExceptionId -> Dhall.expected spdxLicenseExceptionId
-      Scope -> Dhall.expected executableScope
-      Mixin -> Dhall.expected mixin
-      ModuleRenaming -> Dhall.expected moduleRenaming
-      ForeignLibOption -> Dhall.expected foreignLibOption
-      ForeignLibType -> Dhall.expected foreignLibType
-      TestType -> Dhall.expected testSuiteInterface
-      Flag -> Dhall.expected flag
-      PkgconfigVersionRange -> Dhall.expected pkgconfigVersionRange
-      LibraryName -> Dhall.expected libraryName
-      LibraryVisibility -> Dhall.expected libraryVisibility
+      SourceRepo -> case Dhall.expected sourceRepo of Success value -> value
+      RepoType -> case Dhall.expected repoType of Success value -> value
+      RepoKind -> case Dhall.expected repoKind of Success value -> value
+      Compiler -> case Dhall.expected compilerFlavor of Success value -> value
+      OS -> case Dhall.expected operatingSystem of Success value -> value
+      Extension -> case Dhall.expected extension of Success value -> value
+      CompilerOptions -> case Dhall.expected compilerOptions of Success value -> value
+      Arch -> case Dhall.expected arch of Success value -> value
+      Language -> case Dhall.expected language of Success value -> value
+      License -> case Dhall.expected license of Success value -> value
+      BuildType -> case Dhall.expected buildType of Success value -> value
+      Package -> case Dhall.expected genericPackageDescription of Success value -> value
+      Dependency -> case Dhall.expected dependency of Success value -> value
+      VersionRange -> case Dhall.expected versionRange of Success value -> value
+      Version -> case Dhall.expected version of Success value -> value
+      SPDX -> case Dhall.expected spdxLicense of Success value -> value
+      LicenseId -> case Dhall.expected spdxLicenseId of Success value -> value
+      LicenseExceptionId -> case Dhall.expected spdxLicenseExceptionId of Success value -> value
+      Scope -> case Dhall.expected executableScope of Success value -> value
+      Mixin -> case Dhall.expected mixin of Success value -> value
+      ModuleRenaming -> case Dhall.expected moduleRenaming of Success value -> value
+      ForeignLibOption -> case Dhall.expected foreignLibOption of Success value -> value
+      ForeignLibType -> case Dhall.expected foreignLibType of Success value -> value
+      TestType -> case Dhall.expected testSuiteInterface of Success value -> value
+      Flag -> case Dhall.expected flag of Success value -> value
+      PkgconfigVersionRange -> case Dhall.expected pkgconfigVersionRange of Success value -> value
+      LibraryName -> case Dhall.expected libraryName of Success value -> value
+      LibraryVisibility -> case Dhall.expected libraryVisibility of Success value -> value
   )
 
 
@@ -164,7 +165,7 @@ cse subrecord ( fmap Just -> body ) ( fmap Just -> expr ) =
       Expr.Embed Nothing
 
     go e | subrecord, Just extra <- subtractRecordFields e body =
-      Expr.CombineTypes ( Expr.Embed Nothing ) extra
+      Expr.CombineTypes mempty ( Expr.Embed Nothing ) extra
 
     go e =
       e
