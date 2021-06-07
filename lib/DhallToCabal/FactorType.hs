@@ -223,9 +223,9 @@ mapWithBindings f =
       UnorderedMap.alter ( Just . succ . fromMaybe 0 )
 
     go bindings = \case
-      Expr.Lam n t b ->
-        Expr.Lam n
-          ( go bindings t )
+      Expr.Lam charSet binding@(Dhall.FunctionBinding{functionBindingVariable=n, functionBindingAnnotation=t}) b ->
+        Expr.Lam charSet
+          ( binding { Dhall.functionBindingAnnotation = go bindings t } )
           ( go ( shiftName n bindings ) b )
 
       Expr.Pi charSet n t b ->
