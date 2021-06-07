@@ -348,6 +348,7 @@ packageDefault resolve = fields
             )
           , ( name
             , Expr.Pi
+                mempty
                 "config"
                 ( Expr.Var "types" `Expr.Field` "Config" )
                 ( generaliseDeclared typ )
@@ -380,6 +381,7 @@ packageDefault resolve = fields
       , textFieldDefault "homepage" ""
       , emptyOptionalDefault "library"
           ( Expr.Pi
+              mempty
               "config"
               ( Expr.Var "types" `Expr.Field` "Config" )
               ( generaliseDeclared ( library False ) )
@@ -1131,7 +1133,7 @@ condTree t =
           . go
           . unifyCondTree
     , Dhall.declared =
-        Expr.Pi "_" configRecord ( Dhall.declared t )
+        Expr.Pi mempty "_" configRecord ( Dhall.declared t )
     }
 
 

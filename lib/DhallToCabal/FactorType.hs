@@ -228,8 +228,8 @@ mapWithBindings f =
           ( go bindings t )
           ( go ( shiftName n bindings ) b )
 
-      Expr.Pi n t b ->
-        Expr.Pi n ( go bindings t ) ( go ( shiftName n bindings ) b )
+      Expr.Pi charSet n t b ->
+        Expr.Pi charSet n ( go bindings t ) ( go ( shiftName n bindings ) b )
 
       Expr.App f a ->
         Expr.App ( go bindings f ) ( go bindings a )

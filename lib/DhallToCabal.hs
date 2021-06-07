@@ -252,10 +252,11 @@ version =
           Dhall.extractError ( StrictText.pack ( show e ) )
 
     expected =
-      Expr.Pi "Version" ( Expr.Const Expr.Type )
+      Expr.Pi mempty "Version" ( Expr.Const Expr.Type )
         $ Expr.Pi
+            mempty
             "v"
-            ( Expr.Pi "_" ( Dhall.expected Dhall.string ) "Version" )
+            ( Expr.Pi mempty "_" ( Dhall.expected Dhall.string ) "Version" )
             "Version"
 
   in Dhall.Decoder { .. }
@@ -569,7 +570,7 @@ subLibrary =
       Expr.Record
         ( Map.fromList
           [ ( "name", Dhall.expected unqualComponentName )
-          , ( "library", Expr.Pi "_" configRecordType ( Dhall.expected library ) )
+          , ( "library", Expr.Pi mempty "_" configRecordType ( Dhall.expected library ) )
           ]
         )
 
@@ -715,23 +716,24 @@ pkgconfigVersionRange =
 
         versionToVersionRange =
           Expr.Pi
+            mempty
             "_"
             ( Dhall.expected pkgconfigVersion )
             pkgconfigVersionRange
 
         combine =
-          Expr.Pi "_" pkgconfigVersionRange ( Expr.Pi "_" pkgconfigVersionRange pkgconfigVersionRange )
+          Expr.Pi mempty "_" pkgconfigVersionRange ( Expr.Pi mempty "_" pkgconfigVersionRange pkgconfigVersionRange )
 
       in
-      Expr.Pi "PkgconfigVersionRange" ( Expr.Const Expr.Type )
-        $ Expr.Pi "anyVersion" pkgconfigVersionRange
-        $ Expr.Pi "thisVersion" versionToVersionRange
-        $ Expr.Pi "laterVersion" versionToVersionRange
-        $ Expr.Pi "earlierVersion" versionToVersionRange
-        $ Expr.Pi "orLaterVersion" versionToVersionRange
-        $ Expr.Pi "orEarlierVersion" versionToVersionRange
-        $ Expr.Pi "unionVersionRanges" combine
-        $ Expr.Pi "intersectVersionRanges" combine
+      Expr.Pi mempty "PkgconfigVersionRange" ( Expr.Const Expr.Type )
+        $ Expr.Pi mempty "anyVersion" pkgconfigVersionRange
+        $ Expr.Pi mempty "thisVersion" versionToVersionRange
+        $ Expr.Pi mempty "laterVersion" versionToVersionRange
+        $ Expr.Pi mempty "earlierVersion" versionToVersionRange
+        $ Expr.Pi mempty "orLaterVersion" versionToVersionRange
+        $ Expr.Pi mempty "orEarlierVersion" versionToVersionRange
+        $ Expr.Pi mempty "unionVersionRanges" combine
+        $ Expr.Pi mempty "intersectVersionRanges" combine
         $ pkgconfigVersionRange
 
   in Dhall.Decoder { .. }
@@ -818,31 +820,33 @@ versionRange =
 
         versionToVersionRange =
           Expr.Pi
+            mempty
             "_"
             ( Dhall.expected version )
             versionRange
 
         combine =
-          Expr.Pi "_" versionRange ( Expr.Pi "_" versionRange versionRange )
+          Expr.Pi mempty "_" versionRange ( Expr.Pi mempty "_" versionRange versionRange )
 
       in
-      Expr.Pi "VersionRange" ( Expr.Const Expr.Type )
-        $ Expr.Pi "anyVersion" versionRange
-        $ Expr.Pi "noVersion" versionRange
-        $ Expr.Pi "thisVersion" versionToVersionRange
-        $ Expr.Pi "notThisVersion" versionToVersionRange
-        $ Expr.Pi "laterVersion" versionToVersionRange
-        $ Expr.Pi "earlierVersion" versionToVersionRange
-        $ Expr.Pi "orLaterVersion" versionToVersionRange
-        $ Expr.Pi "orEarlierVersion" versionToVersionRange
-        $ Expr.Pi "withinVersion" versionToVersionRange
-        $ Expr.Pi "majorBoundVersion" versionToVersionRange
-        $ Expr.Pi "unionVersionRanges" combine
-        $ Expr.Pi "intersectVersionRanges" combine
-        $ Expr.Pi "differenceVersionRanges" combine
+      Expr.Pi mempty "VersionRange" ( Expr.Const Expr.Type )
+        $ Expr.Pi mempty "anyVersion" versionRange
+        $ Expr.Pi mempty "noVersion" versionRange
+        $ Expr.Pi mempty "thisVersion" versionToVersionRange
+        $ Expr.Pi mempty "notThisVersion" versionToVersionRange
+        $ Expr.Pi mempty "laterVersion" versionToVersionRange
+        $ Expr.Pi mempty "earlierVersion" versionToVersionRange
+        $ Expr.Pi mempty "orLaterVersion" versionToVersionRange
+        $ Expr.Pi mempty "orEarlierVersion" versionToVersionRange
+        $ Expr.Pi mempty "withinVersion" versionToVersionRange
+        $ Expr.Pi mempty "majorBoundVersion" versionToVersionRange
+        $ Expr.Pi mempty "unionVersionRanges" combine
+        $ Expr.Pi mempty "intersectVersionRanges" combine
+        $ Expr.Pi mempty "differenceVersionRanges" combine
         $ Expr.Pi
+            mempty
             "invertVersionRange"
-            ( Expr.Pi "_" versionRange versionRange )
+            ( Expr.Pi mempty "_" versionRange versionRange )
             versionRange
 
   in Dhall.Decoder { .. }
@@ -934,32 +938,32 @@ spdxLicense =
           "SPDX"
 
         licenseIdAndException
-          = Expr.Pi "id" ( Dhall.expected spdxLicenseId )
-          $ Expr.Pi "exception" ( Dhall.expected ( Dhall.maybe spdxLicenseExceptionId ) )
+          = Expr.Pi mempty "id" ( Dhall.expected spdxLicenseId )
+          $ Expr.Pi mempty "exception" ( Dhall.expected ( Dhall.maybe spdxLicenseExceptionId ) )
           $ licenseType
 
         licenseRef
-          = Expr.Pi "ref" ( Dhall.expected Dhall.string )
-          $ Expr.Pi "exception" ( Dhall.expected ( Dhall.maybe spdxLicenseExceptionId ) )
+          = Expr.Pi mempty "ref" ( Dhall.expected Dhall.string )
+          $ Expr.Pi mempty "exception" ( Dhall.expected ( Dhall.maybe spdxLicenseExceptionId ) )
           $ licenseType
 
         licenseRefWithFile
-          = Expr.Pi "ref" ( Dhall.expected Dhall.string )
-          $ Expr.Pi "file" ( Dhall.expected Dhall.string )
-          $ Expr.Pi "exception" ( Dhall.expected ( Dhall.maybe spdxLicenseExceptionId ) )
+          = Expr.Pi mempty "ref" ( Dhall.expected Dhall.string )
+          $ Expr.Pi mempty "file" ( Dhall.expected Dhall.string )
+          $ Expr.Pi mempty "exception" ( Dhall.expected ( Dhall.maybe spdxLicenseExceptionId ) )
           $ licenseType
 
         combine =
-          Expr.Pi "_" licenseType ( Expr.Pi "_" licenseType licenseType )
+          Expr.Pi mempty "_" licenseType ( Expr.Pi mempty "_" licenseType licenseType )
 
       in
-      Expr.Pi "SPDX" ( Expr.Const Expr.Type )
-        $ Expr.Pi "license" licenseIdAndException
-        $ Expr.Pi "licenseVersionOrLater" licenseIdAndException
-        $ Expr.Pi "ref" licenseRef
-        $ Expr.Pi "refWithFile" licenseRefWithFile
-        $ Expr.Pi "and" combine
-        $ Expr.Pi "or" combine
+      Expr.Pi mempty "SPDX" ( Expr.Const Expr.Type )
+        $ Expr.Pi mempty "license" licenseIdAndException
+        $ Expr.Pi mempty "licenseVersionOrLater" licenseIdAndException
+        $ Expr.Pi mempty "ref" licenseRef
+        $ Expr.Pi mempty "refWithFile" licenseRefWithFile
+        $ Expr.Pi mempty "and" combine
+        $ Expr.Pi mempty "or" combine
         $ licenseType
 
   in Dhall.Decoder { .. }
@@ -1230,7 +1234,7 @@ guarded t =
             )
 
     expected =
-        Expr.Pi "_" configRecordType ( Dhall.expected t )
+        Expr.Pi mempty "_" configRecordType ( Dhall.expected t )
 
   in Dhall.Decoder { .. }
 
@@ -1303,7 +1307,7 @@ configRecordType :: Expr.Expr Dhall.Parser.Src Dhall.TypeCheck.X
 configRecordType =
   let
     predicate on =
-      Expr.Pi "_" on Expr.Bool
+      Expr.Pi mempty "_" on Expr.Bool
 
   in
     Expr.Record
@@ -1313,9 +1317,10 @@ configRecordType =
           , ( "flag", predicate ( Dhall.expected flagName ) )
           , ( "impl"
             , Expr.Pi
+                mempty
                 "_"
                 ( Dhall.expected compilerFlavor )
-                ( Expr.Pi "_" ( Dhall.expected versionRange ) Expr.Bool )
+                ( Expr.Pi mempty "_" ( Dhall.expected versionRange ) Expr.Bool )
             )
           ]
       )
