@@ -266,11 +266,11 @@ mapWithBindings f =
       Expr.ListAppend a b ->
         Expr.ListAppend ( go bindings a ) ( go bindings b )
 
-      Expr.Combine a b ->
-        Expr.Combine ( go bindings a ) ( go bindings b )
+      Expr.Combine charSet label a b ->
+        Expr.Combine charSet label ( go bindings a ) ( go bindings b )
 
-      Expr.Prefer a b ->
-        Expr.Prefer ( go bindings a ) ( go bindings b )
+      Expr.Prefer charSet annotation a b ->
+        Expr.Prefer charSet annotation ( go bindings a ) ( go bindings b )
 
       Expr.TextAppend a b ->
         Expr.TextAppend ( go bindings a ) ( go bindings b )
@@ -304,8 +304,8 @@ mapWithBindings f =
       Expr.Note s e ->
         Expr.Note s ( go bindings e )
 
-      Expr.CombineTypes a b ->
-        Expr.CombineTypes ( go bindings a ) ( go bindings b )
+      Expr.CombineTypes charSet a b ->
+        Expr.CombineTypes charSet ( go bindings a ) ( go bindings b )
 
       Expr.Project e fs ->
         Expr.Project
