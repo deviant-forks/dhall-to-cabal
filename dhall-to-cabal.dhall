@@ -30,6 +30,8 @@ let deps =
           majorVersions "dhall" [ v "1.38.0" ] [ types.LibraryName.main-library ]
       , dhall-to-cabal =
           package "dhall-to-cabal" anyVersion
+      , either =
+          majorVersions "either" [ v "5.0" ] [ types.LibraryName.main-library ]
       , filepath =
           majorVersions "filepath" [ v "1.4" ] [ types.LibraryName.main-library ]
       , microlens =
@@ -134,6 +136,7 @@ in  prelude.utils.mapBuildInfo
                     , deps.bytestring
                     , deps.containers
                     , deps.contravariant
+                    , deps.either
                     , deps.filepath
                     , deps.microlens
                     , deps.text

@@ -50,6 +50,7 @@ module DhallToCabal
   , sortExpr
   ) where
 
+import Data.Either.Validation ( Validation(..) )
 import Data.List ( partition )
 import Data.Maybe ( fromMaybe )
 import Data.Monoid ( (<>) )
@@ -256,7 +257,7 @@ version =
         $ Expr.Pi
             mempty
             "v"
-            ( Expr.Pi mempty "_" ( Dhall.expected Dhall.string ) "Version" )
+            ( Expr.Pi mempty "_" ( case Dhall.expected Dhall.string of Success value -> value ) "Version" )
             "Version"
 
   in Dhall.Decoder { .. }
@@ -420,7 +421,7 @@ buildInfo = do
 
 buildInfoType :: Expr.Expr Dhall.Parser.Src Dhall.TypeCheck.X
 buildInfoType =
-  Dhall.expected ( Dhall.record buildInfo )
+  case Dhall.expected ( Dhall.record buildInfo ) of Success value -> value
 
 
 testSuite :: Dhall.Decoder Cabal.TestSuite
@@ -569,8 +570,8 @@ subLibrary =
     expected =
       Expr.Record
         ( Map.fromList
-          [ ( "name", Dhall.expected unqualComponentName )
-          , ( "library", Expr.Pi mempty "_" configRecordType ( Dhall.expected library ) )
+          [ ( "name", case Dhall.expected unqualComponentName of Success value -> value )
+          , ( "library", Expr.Pi mempty "_" configRecordType ( case Dhall.expected library of Success value -> value ) )
           ]
         )
 
@@ -718,7 +719,7 @@ pkgconfigVersionRange =
           Expr.Pi
             mempty
             "_"
-            ( Dhall.expected pkgconfigVersion )
+            ( case Dhall.expected pkgconfigVersion of Success value -> value)
             pkgconfigVersionRange
 
         combine =
@@ -822,7 +823,7 @@ versionRange =
           Expr.Pi
             mempty
             "_"
-            ( Dhall.expected version )
+            ( case Dhall.expected version of Success value -> value )
             versionRange
 
         combine =
@@ -938,19 +939,19 @@ spdxLicense =
           "SPDX"
 
         licenseIdAndException
-          = Expr.Pi mempty "id" ( Dhall.expected spdxLicenseId )
+          = Expr.Pi mempty "id" ( case Dhall.expected spdxLicenseId of Success value -> value )
           $ Expr.Pi mempty "exception" ( Dhall.expected ( Dhall.maybe spdxLicenseExceptionId ) )
           $ licenseType
 
         licenseRef
-          = Expr.Pi mempty "ref" ( Dhall.expected Dhall.string )
-          $ Expr.Pi mempty "exception" ( Dhall.expected ( Dhall.maybe spdxLicenseExceptionId ) )
+          = Expr.Pi mempty "ref" ( case Dhall.expected Dhall.string of Success value -> value )
+          $ Expr.Pi mempty "exception" ( case Dhall.expected ( Dhall.maybe spdxLicenseExceptionId ) of Success value -> value )
           $ licenseType
 
         licenseRefWithFile
-          = Expr.Pi mempty "ref" ( Dhall.expected Dhall.string )
-          $ Expr.Pi mempty "file" ( Dhall.expected Dhall.string )
-          $ Expr.Pi mempty "exception" ( Dhall.expected ( Dhall.maybe spdxLicenseExceptionId ) )
+          = Expr.Pi mempty "ref" ( case Dhall.expected Dhall.string of Success value -> value )
+          $ Expr.Pi mempty "file" ( case Dhall.expected Dhall.string of Success value -> value )
+          $ Expr.Pi mempty "exception" ( case Dhall.expected ( Dhall.maybe spdxLicenseExceptionId ) of Success value -> value )
           $ licenseType
 
         combine =
@@ -1234,7 +1235,7 @@ guarded t =
             )
 
     expected =
-        Expr.Pi mempty "_" configRecordType ( Dhall.expected t )
+        Expr.Pi mempty "_" configRecordType ( case Dhall.expected t of Success value -> value)
 
   in Dhall.Decoder { .. }
 
@@ -1312,15 +1313,15 @@ configRecordType =
   in
     Expr.Record
       ( Map.fromList
-          [ ( "os", predicate ( Dhall.expected operatingSystem ) )
-          , ( "arch", predicate ( Dhall.expected arch ) )
-          , ( "flag", predicate ( Dhall.expected flagName ) )
+          [ ( "os", predicate ( case Dhall.expected operatingSystem of Success value -> value ) )
+          , ( "arch", predicate ( case Dhall.expected arch of Success value -> value ) )
+          , ( "flag", predicate ( case Dhall.expected flagName of Success value -> value ) )
           , ( "impl"
             , Expr.Pi
                 mempty
                 "_"
-                ( Dhall.expected compilerFlavor )
-                ( Expr.Pi mempty "_" ( Dhall.expected versionRange ) Expr.Bool )
+                ( case Dhall.expected compilerFlavor of Success value -> value )
+                ( Expr.Pi mempty "_" ( case Dhall.expected versionRange of Success value -> value ) Expr.Bool )
             )
           ]
       )
@@ -1480,4 +1481,4 @@ libraryVisibility = Dhall.union
 
 sortType :: Dhall.Decoder a -> Dhall.Decoder a
 sortType t =
-  t { Dhall.expected = sortExpr ( Dhall.expected t ) }
+  t { Dhall.expected = Success $ sortExpr ( case Dhall.expected t of Success value -> value ) }
