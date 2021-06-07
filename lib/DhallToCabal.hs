@@ -717,21 +717,23 @@ pkgconfigVersionRange =
         e ->
           Dhall.typeError expected e
 
-    expected = do
-      let pkgconfigVersionRange = "PkgconfigVersionRange"
+    expected =
+      let
+        pkgconfigVersionRange =
+          "PkgconfigVersionRange"
 
-      versionToVersionRange <- do
-        expectedPkgconfigVersion <- Dhall.expected pkgconfigVersion
-        return $
+        versionToVersionRange =
           Expr.Pi
             mempty
             "_"
-            expectedPkgconfigVersion
+            ( case Dhall.expected pkgconfigVersion of Success value -> value )
             pkgconfigVersionRange
 
-      let combine = Expr.Pi mempty "_" pkgconfigVersionRange ( Expr.Pi mempty "_" pkgconfigVersionRange pkgconfigVersionRange )
+        combine =
+          Expr.Pi mempty "_" pkgconfigVersionRange ( Expr.Pi mempty "_" pkgconfigVersionRange pkgconfigVersionRange )
 
-      return $
+      in
+      Success $
         Expr.Pi mempty "PkgconfigVersionRange" ( Expr.Const Expr.Type )
           $ Expr.Pi mempty "anyVersion" pkgconfigVersionRange
           $ Expr.Pi mempty "thisVersion" versionToVersionRange
@@ -820,21 +822,23 @@ versionRange =
         e ->
           Dhall.typeError expected e
 
-    expected = do
-      let versionRange = "VersionRange"
+    expected =
+      let
+        versionRange =
+          "VersionRange"
 
-      versionToVersionRange <- do
-        expectedVersion <- Dhall.expected version
-        return $
+        versionToVersionRange =
           Expr.Pi
             mempty
             "_"
-            expectedVersion
+            ( case Dhall.expected version of Success value -> value )
             versionRange
 
-      let combine = Expr.Pi mempty "_" versionRange ( Expr.Pi mempty "_" versionRange versionRange )
+        combine =
+          Expr.Pi mempty "_" versionRange ( Expr.Pi mempty "_" versionRange versionRange )
 
-      return $
+      in
+      Success $
         Expr.Pi mempty "VersionRange" ( Expr.Const Expr.Type )
           $ Expr.Pi mempty "anyVersion" versionRange
           $ Expr.Pi mempty "noVersion" versionRange
